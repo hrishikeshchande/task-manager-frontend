@@ -1,0 +1,224 @@
+<app-header />
+<div class="card">
+  <div class="flex justify-content-between mb-3 gap-3">
+    <p-button
+      label="Add Task"
+      icon="pi pi-plus"
+      severity="success"
+      [rounded]="true"
+      (click)="addNewTask()"
+    />
+    <p-button
+      icon="pi pi-refresh"
+      (click)="loadTask()"
+      [rounded]="true"
+      pTooltip="Refresh Task"
+      tooltipPosition="top"
+      severity="help"
+      [outlined]="true"
+    />
+  </div>
+  <div class="shadow-3 border-round-md">
+    @if (tasks.length !== 0) {
+    <p-table
+      [value]="tasks"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [scrollable]="true"
+      scrollHeight="500px"
+      responsiveLayout="scroll"
+      class="p-datatable-responsive-demo border-3 border-50"
+      [tableStyle]="{ 'min-width': '50rem' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          @for (col of columns; track col.field) {
+          <th [pSortableColumn]="col.field" class="text-center">
+            {{ col.header }}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </th>
+          }
+          <th class="text-center">Actions</th>
+        </tr>
+        <tr>
+          @for (col of columns; track col.field) {
+          <th>
+            @if (col.field !== 'status') {
+            <p-columnFilter
+              [field]="col.field"
+              [type]="'text'"
+              [showOperator]="false"
+              [showClearButton]="true"
+              [showMatchModes]="false"
+              [placeholder]="'Search by ' + col.header"
+            ></p-columnFilter>
+            } @else {
+            <p-columnFilter
+              [field]="col.field"
+              matchMode="equals"
+              [showMenu]="false"
+            >
+              <ng-template
+                pTemplate="filter"
+                let-value
+                let-filter="filterCallback"
+              >
+                <p-dropdown
+                  [options]="statusOption"
+                  placeholder="Select status"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="filter($event.value)"
+                ></p-dropdown>
+              </ng-template>
+            </p-columnFilter>
+            }
+          </th>
+          }
+          <th></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          @for (col of columns; track col.field) {
+          <td
+            [pTooltip]="
+              col.field === 'assignedTo'
+                ? getUserNameById(rowData[col.field])
+                : rowData[col.field]
+            "
+            tooltipPosition="top"
+          >
+            @if (col.field === 'dueDate') {
+            <ng-container>
+              {{ rowData[col.field] | date : "dd-MM-yyyy" }}
+            </ng-container>
+            } @else { @if (col.field === 'assignedTo') {
+            <ng-container>
+              {{ getUserNameById(rowData[col.field]) }}
+            </ng-container>
+            } @else {
+            <ng-container>
+              {{ rowData[col.field] }}
+            </ng-container>
+            } }
+          </td>
+          }
+
+          <!-- Actions Column -->
+          <td class="flex flex-row gap-3">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [outlined]="true"
+              pTooltip="Update Task"
+              (click)="editRow(rowData)"
+              tooltipPosition="top"
+            />
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [outlined]="true"
+              pTooltip="Delete Task"
+              tooltipPosition="top"
+              (click)="deleteRow($event, rowData)"
+              *ngIf="
+                logInUserRole === 'Admin' ||
+                rowData?.createById === userList[0]?.id
+              "
+              severity="danger"
+            />
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    } @else {
+    <div class="text-center p-3 border-3 border-50">
+      <h3>Task list is empty</h3>
+    </div>
+    }
+  </div>
+</div>
+<p-confirmdialog />
+
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '50rem', height: '35rem' }"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [maximizable]="true"
+>
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2">
+      <h2 class="font-bold whitespace-nowrap">Task Details</h2>
+    </div>
+  </ng-template>
+
+  <form
+    [formGroup]="taskForm"
+    class="grid my-3 gap-3 flex justify-content-center"
+  >
+    <div class="col-12 md:col-5 flex flex-column gap-4">
+      <p-floatlabel>
+        <input pInputText id="title" formControlName="title" class="w-full" />
+        <label for="title">Title</label>
+      </p-floatlabel>
+      <p-floatlabel>
+        <input
+          pInputText
+          id="description"
+          formControlName="description"
+          class="w-full"
+        />
+        <label for="description">Description</label>
+      </p-floatlabel>
+      <p-select
+        formControlName="status"
+        [options]="statusOption"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Status"
+        class="w-full md:w-56"
+      />
+    </div>
+
+    <div class="col-12 md:col-5 flex flex-column gap-4">
+      <p-floatlabel>
+        <p-datepicker
+          formControlName="dueDate"
+          inputId="dueDate"
+          showIcon
+          iconDisplay="input"
+          [minDate]="minDate"
+        />
+        <label for="dueDate">Due Date</label>
+      </p-floatlabel>
+      <p-select
+        formControlName="assignedTo"
+        [options]="userList"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Assign to"
+        class="w-full md:w-56"
+      />
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button
+      [rounded]="true"
+      label="Cancel"
+      severity="danger"
+      (click)="cancledTask()"
+    />
+    <p-button
+      [rounded]="true"
+      label="Save"
+      severity="success"
+      (click)="saveTask()"
+      [disabled]="taskForm.invalid"
+    />
+  </ng-template>
+</p-dialog>

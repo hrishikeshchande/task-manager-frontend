@@ -1,0 +1,13 @@
+<p-toast></p-toast>
+<div class="px-0 lg:px-8">
+  <router-outlet></router-outlet>
+  <p-button
+    icon="{{ darkTheme ? 'pi pi-sun' : 'pi pi-moon' }}"
+    class="floating-btn"
+    pTooltip="Theme"
+    tooltipPosition="top"
+    [rounded]="true"
+    severity="warn"
+    (onClick)="toggleDarkMode()"
+  />
+</div>
