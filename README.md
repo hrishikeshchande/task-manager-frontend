@@ -14,7 +14,7 @@ A responsive task management app built with Angular and PrimeNG, featuring JWT-b
 1. **Clone the Repository**
    ```bash
    git clone <your-repo-url>
-   cd your-app-folder
+   git checkout development
    ```
 
 2. **Install Dependencies**
