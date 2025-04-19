@@ -37,7 +37,7 @@ A responsive task management app built with Angular and PrimeNG, featuring JWT-b
 |----------|----------|-------|
 | admin    | admin123 | Admin |
 | user1    | user123  | User  |
-| user2    | user456  | User  |
+| user2    | user123  | User  |
 
 ## 🧭 App Routes
 
