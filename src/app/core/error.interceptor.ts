@@ -31,7 +31,6 @@ export const errorInterceptor: HttpInterceptorFn = (
           case 401:
             errorMessage = 'Unauthorized. Please login again.';
             localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
             router.navigate(['/login']);
             break;
           case 403:

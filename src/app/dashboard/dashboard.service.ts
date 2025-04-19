@@ -9,7 +9,7 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
   getTask() {
     return this.http
-      .get<any>(`${environment.taskServiceApiBaseUrl}/tasks`)
+      .get<any>(`${environment.baseUrl}/task`)
       .pipe(
         tap((response) => {
           return response;
@@ -18,35 +18,17 @@ export class DashboardService {
   }
   postTask(payload: object) {
     return this.http
-      .post<any>(`${environment.taskServiceApiBaseUrl}/tasks`, payload)
+      .post<any>(`${environment.baseUrl}/task`, payload)
       .pipe(
         tap((response) => {
-          if (response.status === 1) {
-            return response;
-          } else {
-            throw new Error(response.message || 'Failed to create task');
-          }
+          return response;
         })
       );
   }
 
   putTask(taskId: string, payload: object) {
     return this.http
-      .put<any>(`${environment.taskServiceApiBaseUrl}/tasks/${taskId}`, payload)
-      .pipe(
-        tap((response) => {
-          if (response.status === 1) {
-            return response;
-          } else {
-            throw new Error(response.message || 'Failed to update task');
-          }
-        })
-      );
-  }
-
-  getUsersList() {
-    return this.http
-      .get<any>(`${environment.authServiceApiBaseUrl}/auth/usersList`)
+      .put<any>(`${environment.baseUrl}/task/${taskId}`, payload)
       .pipe(
         tap((response) => {
           return response;
@@ -56,7 +38,17 @@ export class DashboardService {
 
   deleteTask(taskId: string) {
     return this.http
-      .delete<any>(`${environment.taskServiceApiBaseUrl}/tasks/${taskId}`)
+      .delete<any>(`${environment.baseUrl}/task/${taskId}`)
+      .pipe(
+        tap((response) => {
+          return response;
+        })
+      );
+  }
+
+  getUsersList() {
+    return this.http
+      .get<any>(`${environment.baseUrl}/task/users`)
       .pipe(
         tap((response) => {
           return response;

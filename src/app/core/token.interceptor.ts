@@ -1,10 +1,12 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const messageService = inject(MessageService);
   const token = localStorage.getItem('token');
+  const router = inject(Router);
 
   const isPublic = req.url.includes('/api/auth/login');
 
@@ -18,6 +20,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
       summary: 'Authentication Required',
       detail: 'No token found. Please login to access this resource.',
     });
+    router.navigate(['/login']);
     return next(req);
   }
 

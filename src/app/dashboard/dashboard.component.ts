@@ -53,12 +53,13 @@ export class DashboardComponent implements OnInit {
     { field: 'dueDate', header: 'Due Date' },
     { field: 'assignedTo', header: 'Assigned To' },
     { field: 'createByName', header: 'Created By' },
-  ];
+  ]; 
   statusOption: any[] = [
     { label: 'Pending', value: 'Pending' },
     { label: 'InProgress', value: 'InProgress' },
     { label: 'Done', value: 'Done' },
   ];
+  userDropdownOptions: any[] = [];
   userList: any[] = [];
   selectedRowData: any = {};
   visible: boolean = false;
@@ -136,17 +137,21 @@ export class DashboardComponent implements OnInit {
   loadUsers() {
     this.dashboardService.getUsersList().subscribe({
       next: (res) => {
-        if (res.status === 1 && Array.isArray(res.usersList)) {
-          this.userList = res.usersList.map(
+        if (res.length !== 0) {
+          this.userList = res.map(
             (user: { id: any; username: any }) => ({
               id: user.id,
               name: user.username,
             })
           );
+          this.userDropdownOptions = res.map((user: { username: any; id: any; }) => ({
+            label: user.username,
+            value: user.id
+          }));          
         } else {
           this.messageService.add({
             severity: 'warn',
-            summary: 'Failed to Load Users',
+            summary: 'Users not found',
             detail: res.message || 'Could not fetch users.',
           });
         }
@@ -235,11 +240,11 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  deleteTask(rowData: any) {
+  async deleteTask(rowData: any) {
     this.dashboardService.deleteTask(rowData.id).subscribe({
-      next: (response) => {
+      next: async (response) => {
         if (response?.status === 1) {
-          this.loadTask();
+          await this.loadTask();
           this.tasks = this.tasks.filter((task) => task.id !== rowData.id);
           this.messageService.add({
             severity: 'success',
@@ -273,7 +278,7 @@ export class DashboardComponent implements OnInit {
     this.taskForm.reset();
     this.visible = false;
   }
-  saveTask() {
+  async saveTask() {
     if (this.taskForm.invalid) return;
 
     const formValue = this.taskForm.value;
@@ -284,13 +289,12 @@ export class DashboardComponent implements OnInit {
 
       this.dashboardService.putTask(taskId, updatedTask).subscribe({
         next: (res) => {
-          if (res.status === 1) {
+          if (res.id) {
             this.messageService.add({
               severity: 'success',
               summary: 'Task Updated',
               detail: res.message || 'The task was updated successfully.',
             });
-            this.loadTask();
             this.visible = false;
           } else {
             this.messageService.add({
@@ -311,13 +315,12 @@ export class DashboardComponent implements OnInit {
     } else {
       this.dashboardService.postTask(formValue).subscribe({
         next: (res) => {
-          if (res.status === 1) {
+          if (res.id) {
             this.messageService.add({
               severity: 'success',
               summary: 'Task Created',
               detail: res.message || 'A new task was created successfully.',
             });
-            this.loadTask();
             this.visible = false;
           } else {
             this.messageService.add({
@@ -336,5 +339,6 @@ export class DashboardComponent implements OnInit {
         },
       });
     }
+    await this.loadTask();
   }
 }

@@ -44,16 +44,7 @@
         <tr>
           @for (col of columns; track col.field) {
           <th>
-            @if (col.field !== 'status') {
-            <p-columnFilter
-              [field]="col.field"
-              [type]="'text'"
-              [showOperator]="false"
-              [showClearButton]="true"
-              [showMatchModes]="false"
-              [placeholder]="'Search by ' + col.header"
-            ></p-columnFilter>
-            } @else {
+            @if (col.field === 'status') {
             <p-columnFilter
               [field]="col.field"
               matchMode="equals"
@@ -69,10 +60,41 @@
                   placeholder="Select status"
                   optionLabel="label"
                   optionValue="value"
+                  [showClear]="true"
                   (onChange)="filter($event.value)"
                 ></p-dropdown>
               </ng-template>
             </p-columnFilter>
+            }@else if(col.field === 'assignedTo'){
+            <p-columnFilter
+              [field]="col.field"
+              matchMode="equals"
+              [showMenu]="false"
+            >
+              <ng-template
+                pTemplate="filter"
+                let-value
+                let-filter="filterCallback"
+              >
+                <p-dropdown
+                  [options]="userDropdownOptions"
+                  placeholder="Select status"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="true"
+                  (onChange)="filter($event.value)"
+                ></p-dropdown>
+              </ng-template>
+            </p-columnFilter>
+            } @else {
+            <p-columnFilter
+              [field]="col.field"
+              [type]="'text'"
+              [showOperator]="false"
+              [showClearButton]="true"
+              [showMatchModes]="false"
+              [placeholder]="'Search by ' + col.header"
+            ></p-columnFilter>
             }
           </th>
           }

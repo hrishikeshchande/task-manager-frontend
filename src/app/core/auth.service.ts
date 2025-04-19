@@ -19,28 +19,34 @@ export class AuthService {
 
   login(payload: object) {
     return this.http
-      .post<any>(`${environment.authServiceApiBaseUrl}/auth/login`, payload)
+      .post<any>(`${environment.baseUrl}/auth/login`, payload)
       .pipe(
         tap((response) => {
           localStorage.setItem('token', response?.token);
-          localStorage.setItem('refreshToken', response?.refreshToken);
           this.authStatus$.next(true);
         })
       );
   }
 
   logout() {
-    return this.http
-      .get<any>(`${environment.authServiceApiBaseUrl}/auth/logout`)
-      .pipe(
-        tap((response) => {
+  return this.http
+    .get<any>(`${environment.baseUrl}/auth/logout`)
+    .pipe(
+      tap({
+        next: () => {
           localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          this.router.navigate(['/login']);
           this.authStatus$.next(false);
-        })
-      );
-  }
+          this.router.navigate(['/login']);
+        },
+        error: () => {
+          localStorage.removeItem('token');
+          this.authStatus$.next(false);
+          this.router.navigate(['/login']);
+        }
+      })
+    );
+}
+
 
   isLoggedIn(): boolean {
     return this.authStatus$.value;
