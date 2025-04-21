@@ -24,7 +24,7 @@ A responsive task management app built with Angular and PrimeNG, featuring JWT-b
 
 3. **Run the App**
    ```bash
-   npm start
+   ng serve
    ```
    - App runs on: `http://localhost:4200`
 
